@@ -16,7 +16,10 @@ jobs:
 
     - name: Login to Azure
       run: |
-        echo $AZURE_PASSWORD | az login -u $AZURE_USERNAME -p @STDIN
+        az login --username $AZURE_USERNAME --password $AZURE_PASSWORD
+      env:
+        AZURE_USERNAME: ${{ secrets.AZURE_USERNAME }}
+        AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
 
     - name: Deploy Bicep
       run: |
@@ -25,6 +28,4 @@ jobs:
           --template-file infrastructure-as-code/main.bicep \
           --parameters infrastructure-as-code/parameters.json
       env:
-        AZURE_USERNAME: ${{ secrets.AZURE_USERNAME }}
-        AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
         RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
