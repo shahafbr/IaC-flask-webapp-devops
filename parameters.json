@@ -1,0 +1,31 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "location": {
+        "value": "eastus"
+      },
+      "containerRegistryName": {
+        "value": "sb-CR"
+      },
+      "keyVaultName": {
+      "value": "sb-kv"
+      },
+      "keyVaultSecretAdminUsername": {
+      "value": "sb-ad"
+      },
+      "keyVaultSecretAdminPassword": {
+      "value": "sb-pass"
+      },
+      "containerRegistryImageVersion": {
+        "value": "latest"
+      },
+      "appServicePlanName": {
+        "value": "sb-asp"
+      },
+      "webAppName": {
+        "value": "sb-webApp"
+      }
+    }
+  }
+  
