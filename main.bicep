@@ -5,6 +5,7 @@ param appServicePlanName string
 param containerRegistryImageName string 
 param containerRegistryImageVersion string
 param keyVaultName string
+
 @secure()
 param keyVaultSecretAdminUsername string
 @secure()
