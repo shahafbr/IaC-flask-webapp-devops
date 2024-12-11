@@ -1,63 +1,42 @@
-param containerRegistryName string
-param location string
-param webAppName string
 param appServicePlanName string
-param containerRegistryImageName string 
-param containerRegistryImageVersion string
-param keyVaultName string
+param appServiceWebsiteBEName string
+param location string = resourceGroup().location
+param containerRegistryName string
+param dockerRegistryImageName string 
+param dockerRegistryImageVersion string
+param userAlias string
+param appServicePlanSkuName string
 
-@secure()
-param keyVaultSecretAdminUsername string
-@secure()
-param keyVaultSecretAdminPassword string
-
-
-// Deploy Azure Container Registry
-module acr './modules/acr.bicep' = {
-  name: 'deployAcr'
+module containerRegistry 'modules/acr.bicep' = {
+  name: 'cr-${userAlias}'
   params: {
-    name: containerRegistryName
-    location: location
-    keyVaultName: keyVaultName
-    keyVaultSecretAdminUsername: keyVaultSecretAdminUsername
-    keyVaultSecretAdminPassword: keyVaultSecretAdminPassword
+  name: containerRegistryName
+  location: location
   }
-}
-
-// Deploy App Service Plan
-module appServicePlan './modules/appServicePlan.bicep' = {
-  name: 'deployAppServicePlan'
+  }
+  module appServicePlan 'modules/app-service-plan.bicep' = {
+  name: 'asp-${userAlias}'
   params: {
-    name: appServicePlanName
-    location: location
-    sku: {
-      capacity: 1
-      family: 'B'
-      name: 'B1'
-      size: 'B1'
-      tier: 'Basic'
-      reserved: true
-    }
+  location: location
+  appServicePlanName: appServicePlanName
+  skuName: appServicePlanSkuName
   }
-}
-
-// Deploy Web App
-module webApp './modules/webApp.bicep' = {
-  name: 'deployWebApp'
+  }
+  module appServiceWebsiteBE 'modules/containers-web-app.bicep' = {
+  name: 'appfe-${userAlias}'
   params: {
-    name: webAppName
-    location: location
-    serverFarmResourceId: resourceId('Microsoft.Web/serverfarms', appServicePlanName)
-    siteConfig: {
-      linuxFxVersion: 'DOCKER|${acr.outputs.acrLoginServer}/${containerRegistryImageName}:${containerRegistryImageVersion}'
-      appCommandLine: ''
-    }
-    appSettingsKeyValuePairs: {
-      WEBSITES_ENABLE_APP_SERVICE_STORAGE: false
-      DOCKER_REGISTRY_SERVER_URL: acr.outputs.acrLoginServer
-      DOCKER_REGISTRY_SERVER_USERNAME: keyVaultSecretAdminUsername
-      DOCKER_REGISTRY_SERVER_PASSWORD: keyVaultSecretAdminPassword
-    }
+  name: appServiceWebsiteBEName
+  location: location
+  appServicePlanId: appServicePlan.outputs.id
+  appCommandLine: ''
+  dockerRegistryName: containerRegistryName
+  dockerRegistryServerUserName: containerRegistry.outputs.containerRegistryUserName
+  dockerRegistryServerPassword: containerRegistry.outputs.containerRegistryPassword0
+  dockerRegistryImageName: dockerRegistryImageName
+  dockerRegistryImageVersion: dockerRegistryImageVersion
   }
-}
-
+  dependsOn: [
+  containerRegistry
+  appServicePlan
+  ]
+  }
